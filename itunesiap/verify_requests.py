@@ -85,6 +85,7 @@ class RequestsVerify(object):
         if use_production:
             try:
                 response = self.verify_from(self.PRODUCTION_VALIDATION_URL, timeout=timeout, verify_ssl=verify_ssl)
+                response.env = 'production'
             except exceptions.InvalidReceipt as e:
                 if not use_sandbox or e.status != self.STATUS_SANDBOX_RECEIPT_ERROR:
                     raise
@@ -92,6 +93,7 @@ class RequestsVerify(object):
         if not response and use_sandbox:
             try:
                 response = self.verify_from(self.SANDBOX_VALIDATION_URL, timeout=timeout, verify_ssl=verify_ssl)
+                response.env = 'sandbox'
             except exceptions.InvalidReceipt:
                 raise
 

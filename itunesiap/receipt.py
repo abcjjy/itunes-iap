@@ -197,14 +197,6 @@ class ObjectMapper(object):
             "False.".format(name=name))
         _warned_unlisted_field[name] = True
 
-    @property
-    def env(self):
-        return self._['env'] if 'env' in self._ else ''
-
-    @env.setter
-    def env(self, value):
-        self._['env'] = value
-
 class Receipt(ObjectMapper):
     """The actual receipt.
 
@@ -456,3 +448,12 @@ class Response(ObjectMapper):
             return InApp.from_list(info)
         else:  # pragma: no cover
             assert False
+
+    @property
+    def env(self):
+        return self._['env'] if 'env' in self._ else ''
+
+    @env.setter
+    def env(self, value):
+        self._['env'] = value
+
