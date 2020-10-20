@@ -1,25 +1,27 @@
 language: python
+cache: pip
 sudo: false
 python:
-  - "2.6"
+  - "pypy2.7-7.1.1"
+  - "pypy3.6-7.1.1"
   - "2.7"
-  - "3.3"
-  - "3.4"
+  - "3.8"
+  - "3.7"
+  - "3.6"
   - "3.5"
+  - "3.4"
   - "nightly"
 # command to install dependencies
 install:
-  - "pip install flake8 mock pytest pytest-cov python-coveralls ."
-# command to run tests
+  - "pip install --upgrade pip"
+  - "pip install flake8 sphinx '.[test]'"
+# command to run test
 script:
-  - "flake8 --ignore=E501 ."
-  - "py.test --cov=itunesiap -vv tests/"
+  - "flake8 --ignore=E501,E999 ."
+  - "pytest --cov=itunesiap -vv tests/"
+  - "python -msphinx -M html docs build"
 after_success:
-  - "coveralls"
   - bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
 matrix:
   allow_failures:
-    - python:
-      - pypy
-      - pypy3
-      - nightly
+    - python: "nightly"

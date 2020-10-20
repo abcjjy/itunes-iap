@@ -12,8 +12,7 @@ import itunesiap.legacy as itunesiap
 from itunesiap.legacy import Request, Receipt, set_verification_mode
 from itunesiap.legacy import exceptions
 
-
-from tests.itunesiap_test import LEGACY_RAW_RECEIPT
+from tests.conftest import _raw_receipt_legacy as raw_receipt_legacy
 
 
 class TestsIAP(unittest.TestCase):
@@ -43,6 +42,7 @@ class TestsIAP(unittest.TestCase):
         # Response with multiple in_app's
         self.iap_response_in_app = {
             u'status': 0,
+            u'latest_receipt': u'__RECEIPT_DATA',
             u'receipt': {
                 u'original_purchase_date_pst': u'2013-01-01 00:00:00 America/Los_Angeles',
                 u'version_external_identifier': 0,
@@ -93,7 +93,7 @@ class TestsIAP(unittest.TestCase):
         assert Request('').use_sandbox is True
 
     def test_request(self):
-        sandbox_receipt = LEGACY_RAW_RECEIPT
+        sandbox_receipt = raw_receipt_legacy()
 
         set_verification_mode('production')
         request = Request(sandbox_receipt)
@@ -136,7 +136,7 @@ class TestsIAP(unittest.TestCase):
                 assert e.args[1] == 'Not avaliable'
 
     def test_context(self):
-        sandbox_receipt = LEGACY_RAW_RECEIPT
+        sandbox_receipt = raw_receipt_legacy()
         request = Request(sandbox_receipt, verify_ssl=True)
         configs = request.use_production, request.use_sandbox
         with request.verification_mode('production'):
@@ -163,8 +163,12 @@ class TestsIAP(unittest.TestCase):
         assert receipt.quantity == u'1'  # check quantity
         assert receipt.unique_identifier == u'bcbdb3d45543920dd9sd5c79a72948001fc22a39'
 
+    def test_receipt2(self):
+        receipt = Receipt(self.iap_response_in_app)
+        assert receipt.latest_receipt
+
     def test_shortcut(self):
-        sandbox_receipt = LEGACY_RAW_RECEIPT
+        sandbox_receipt = raw_receipt_legacy()
         mode = itunesiap.get_verification_mode()
         itunesiap.set_verification_mode('sandbox')
         itunesiap.verify(sandbox_receipt)

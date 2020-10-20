@@ -1,5 +1,6 @@
-
+""":mod:`itunesiap.exceptions`"""
 from prettyexc import PrettyException as E
+from .receipt import Response
 
 
 class RequestError(E):
@@ -7,15 +8,15 @@ class RequestError(E):
 
 
 class ItunesServerNotAvailable(RequestError):
-    pass
+    '''iTunes server is not available. No response.'''
 
 
 class ItunesServerNotReachable(ItunesServerNotAvailable):
-    pass
+    '''iTunes server is not reachable - including connection timeout.'''
 
 
-class InvalidReceipt(RequestError):
-    _req_kwargs_keys = ['status']
+class InvalidReceipt(RequestError, Response):
+    '''A receipt was given by iTunes server but it has error.'''
     _descriptions = {
         21000: 'The App Store could not read the JSON object you provided.',
         21002: 'The data in the receipt-data property was malformed.',
@@ -27,10 +28,10 @@ class InvalidReceipt(RequestError):
         21008: 'This receipt is a production receipt, but it was sent to the sandbox service for verification.',
     }
 
+    def __init__(self, response_data):
+        Response.__init__(self, response_data)
+        RequestError.__init__(self, response_data)
+
     @property
     def description(self):
         return self._descriptions.get(self.status, None)
-
-
-class MissingFieldError(E, AttributeError, KeyError):
-    pass

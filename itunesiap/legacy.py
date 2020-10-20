@@ -32,7 +32,7 @@ def config_from_mode(mode):
 
 def set_verification_mode(mode):
     """Set global verification mode that where allows production or sandbox.
-    `production`, `sandbox`, `review` or `reject` availble. Otherwise raise
+    `production`, `sandbox`, `review` or `reject` available. Otherwise raise
     an exception.
 
     `production`: Allows production receipts only. Default.
@@ -68,7 +68,7 @@ class Request(object):
         self.verify_ssl = kwargs.get('verify_ssl', False)
         self.response = None
 
-    def __repr__(self):
+    def __repr__(self):  # pragma: no cover
         valid = None
         if self.result:
             valid = self.result['status'] == 0
@@ -92,7 +92,7 @@ class Request(object):
         post_body = json.dumps(self.request_content)
         try:
             self.response = requests.post(url, post_body, verify=verify_ssl)
-        except requests.exceptions.RequestException:
+        except requests.exceptions.RequestException:  # pragma: no cover
             raise
 
         if self.response.status_code != 200:
@@ -100,11 +100,13 @@ class Request(object):
 
         status = self.result['status']
         if status != 0:
-            raise exceptions.InvalidReceipt(status, receipt=self.result.get('receipt', None))
+            e = exceptions.InvalidReceipt(self.result)
+            e.receipt = self.result.get('receipt', None)
+            raise e
         return self.result
 
     def _extract_receipt(self, receipt_data):
-        """There are two formats that itunes iap purchase receipts are
+        """There are two formats that iTunes iap purchase receipts are
         sent back in
         """
         if 'receipt' not in receipt_data:
@@ -115,11 +117,11 @@ class Request(object):
         return receipt_data
 
     @deprecated
-    def validate(self):
+    def validate(self):  # pragma: no cover
         return self.verify()
 
     def verify(self, verify_ssl=None):
-        """Try verification with settings. Returns a Receipt object if successed.
+        """Try verification with settings. Returns a Receipt object if succeeded.
         Or raise an exception. See `self.response` or `self.result` to see details.
         """
         assert(self.use_production or self.use_sandbox)
@@ -135,7 +137,7 @@ class Request(object):
         if self.use_sandbox:
             try:
                 receipt = self.verify_from(RECEIPT_SANDBOX_VALIDATION_URL, verify_ssl)
-            except exceptions.InvalidReceipt:
+            except exceptions.InvalidReceipt:  # pragma: no cover
                 raise
 
         return Receipt(receipt)
@@ -149,14 +151,14 @@ class Request(object):
 
 
 class Receipt(object):
-    """Pretty interface for decoded receipt obejct.
+    """Pretty interface for decoded receipt object.
     """
     def __init__(self, data):
         self.data = data
         self.receipt = data['receipt']
         self.receipt_keys = list(self.receipt.keys())
 
-    def __repr__(self):
+    def __repr__(self):  # pragma: no cover
         return u'<Receipt({0}, {1})>'.format(self.status, self.receipt)
 
     @property
@@ -181,10 +183,10 @@ class Receipt(object):
 
 
 def verify(data, test_paid=lambda id: id):
-    """Convinient verification shortcut.
+    """Convenient verification shortcut.
 
-    :param data: Itunes receipt data
-    :param test_paid: Function to test the recept is paid. Function should
+    :param data: iTunes receipt data
+    :param test_paid: Function to test the receipt is paid. Function should
         raise error to disallow response. Parameter is `original_transaction_id`
     :return: :class:`itunesiap.core.Response`
     """
