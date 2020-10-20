@@ -162,7 +162,8 @@ class ObjectMapper(object):
                     try:
                         value = _self._[data_key]
                     except KeyError:
-                        raise MissingFieldError(name)
+                        # raise MissingFieldError(name)
+                        return None
                     return transform(value)
                 setattr(self.__class__, name, lazy_property(_get))
             else:
